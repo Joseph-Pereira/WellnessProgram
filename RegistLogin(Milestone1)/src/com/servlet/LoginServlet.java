@@ -5,16 +5,14 @@ public class LoginServlet extends HttpServlet {
 
         String email = request.getParameter("email");
         String password = request.getParameter("password");
-
+        String phone = request.getParameter("phone");
         // Authenticate user
-        boolean isAuthenticated = UserDAO.authenticateUser(email, password);
-
+        boolean isAuthenticated = UserDAO.authenticateUser(email, password, phone);
         if (!isAuthenticated) {
-            request.setAttribute("error", "Invalid email or password.");
+            request.setAttribute("error", "Invalid login credentials.");
             request.getRequestDispatcher("login.jsp").forward(request, response);
             return;
         }
-
         // Start session and redirect
         HttpSession session = request.getSession();
         session.setAttribute("user", email);

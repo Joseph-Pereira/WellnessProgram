@@ -1,55 +1,72 @@
+package com.servlet;
+
+import com.dao.UserDAO;
+import com.model.User;
+import com.util.PasswordUtil;
+import com.util.ValidationUtil;
+
+import javax.servlet.ServletException;
+import javax.servlet.annotation.WebServlet;
+import javax.servlet.http.*;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+
 @WebServlet("/register")
 public class RegisterServlet extends HttpServlet {
-
-    private static final String PASSWORD_REGEX =
-            "^(?=.*[A-Z])(?=.*\\d)(?=.*[^a-zA-Z0-9]).{8,}$";
 
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
+        // Get parameters from form
         String email = request.getParameter("email");
         String password = request.getParameter("password");
         String phone = request.getParameter("phone");
 
         List<String> errors = new ArrayList<>();
 
-        // Input Validation
-        if (email == null || !email.matches("^[\\w.-]+@[\\w.-]+\\.[a-zA-Z]{2,}$")) {
+        // Validate email
+        if (email == null || !ValidationUtil.isValidEmail(email)) {
             errors.add("Invalid email format.");
         }
 
-        if (password == null || !password.matches(PASSWORD_REGEX)) {
+        // Validate password
+        if (password == null || !PasswordUtil.isValidPassword(password)) {
             errors.add("Password must be at least 8 characters, include 1 uppercase letter, 1 digit, and 1 special character.");
         }
 
-        if (phone == null || !phone.matches("^[0-9]{10,15}$")) {
-            errors.add("Invalid phone number. Digits only.");
+        //  Validate phone number
+        if (phone == null || !ValidationUtil.isValidPhoneNumber(phone)) {
+            errors.add("Phone number must be exactly 10 digits and start with a 0.");
         }
 
-        // Duplicate check (pseudo-code - replace with actual DB logic)
-        boolean emailExists = UserDAO.emailExists(email); // Assume you have a UserDAO class
-        if (emailExists) {
-            errors.add("Email is already registered.");
+        // Check for duplicate email
+        if (UserDAO.emailExists(email)) {
+            errors.add("An account with this email already exists.");
         }
 
+        // If errors, return to register.jsp
         if (!errors.isEmpty()) {
             request.setAttribute("errors", errors);
             request.getRequestDispatcher("register.jsp").forward(request, response);
             return;
         }
 
-        // Register user
-        boolean success = UserDAO.registerUser(email, password, phone); // Hash password in real apps
+        // Hash password and create user
+        String hashedPassword = PasswordUtil.hashPassword(password);
+        User newUser = new User(email, hashedPassword, phone);
+        boolean success = UserDAO.registerUser(newUser);
+
         if (!success) {
-            errors.add("Internal error during registration. Please try again.");
+            errors.add("Something went wrong during registration.");
             request.setAttribute("errors", errors);
             request.getRequestDispatcher("register.jsp").forward(request, response);
             return;
         }
 
-        // Redirect to dashboard
+        //  Start session and redirect to dashboard
         HttpSession session = request.getSession();
-        session.setAttribute("user", email);
+        session.setAttribute("user", newUser.getEmail());
         response.sendRedirect("dashboard.jsp");
     }
 }
