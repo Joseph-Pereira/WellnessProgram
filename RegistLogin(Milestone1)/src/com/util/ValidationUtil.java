@@ -6,5 +6,5 @@ public class ValidationUtil {
     }
 
     public static boolean isValidPhoneNumber(String phone) {
-        return phone != null && phone.matches("^0[0-9]{9}$");
-    } }
+        return phone != null && phone.matches("^0\\d{9}$");
+    }}
