@@ -10,7 +10,7 @@
     <div class="card shadow-lg mx-auto" style="max-width: 500px;">
         <div class="card-body">
             <h3 class="card-title text-center">Student Registration</h3>
-            <form action="RegisterServlet" method="post">
+            <form action="${pageContext.request.contextPath}/register" method="post">
                 <div class="mb-3">
                     <label class="form-label">Student Number</label>
                     <input type="text" name="student_number" class="form-control" required>

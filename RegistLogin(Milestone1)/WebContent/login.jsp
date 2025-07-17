@@ -10,7 +10,7 @@
     <div class="card shadow-lg mx-auto" style="max-width: 400px;">
         <div class="card-body">
             <h3 class="card-title text-center">Student Login</h3>
-            <form action="LoginServlet" method="post">
+            <form action="login" method="post">
                 <div class="mb-3">
                     <label class="form-label">Email</label>
                     <input type="email" name="email" class="form-control" required>
